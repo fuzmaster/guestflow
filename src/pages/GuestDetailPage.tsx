@@ -77,7 +77,7 @@ export default function GuestDetailPage({ guest, upsertGuest, deleteGuest, openP
             <p>Episode: {guest.episodeTitle || 'Not set'}</p>
             <p>Recording: {formatDate(guest.recordingDate)}</p>
             <p>Launch: {formatDate(guest.launchDate)}</p>
-            <p>Guest portal: /guest/{guest.guestPortalSlug}</p>
+            <p>Guest portal: guestflow.app/g/{guest.guestPortalSlug}</p>
           </section>
           <section>
             <h3>Follow-up</h3>
