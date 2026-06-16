@@ -2,9 +2,13 @@ import { useState } from 'react';
 import type { AssetStatus, Guest } from '../types';
 import { formatDate } from '../lib/dates';
 import { getMissingAssets, getShareChecklistProgress, getSuggestedNextAction } from '../lib/guestLogic';
+import { getReadinessScore, getReadinessSignals } from '../lib/readiness';
+import { guestPortalUrl } from '../lib/portal';
 import StatusPill from '../components/StatusPill';
 import ChecklistItem from '../components/ChecklistItem';
 import GuestForm from '../components/GuestForm';
+import ReadinessRing from '../components/ReadinessRing';
+import CopyLinkButton from '../components/CopyLinkButton';
 
 const assetOptions: AssetStatus[] = ['needed', 'requested', 'received', 'not_needed'];
 
@@ -18,6 +22,8 @@ type Props = {
 export default function GuestDetailPage({ guest, upsertGuest, deleteGuest, openPortal }: Props) {
   const [editing, setEditing] = useState(false);
   const share = getShareChecklistProgress(guest);
+  const score = getReadinessScore(guest);
+  const signals = getReadinessSignals(guest);
 
   function update<K extends keyof Guest>(key: K, value: Guest[K]) {
     upsertGuest({ ...guest, [key]: value });
@@ -34,6 +40,14 @@ export default function GuestDetailPage({ guest, upsertGuest, deleteGuest, openP
         <StatusPill stage={guest.stage} />
       </div>
 
+      <div className="readiness-banner">
+        <ReadinessRing score={score} size={72} label={`${score}% ready`} />
+        <div>
+          <strong>{score}% ready</strong>
+          <p className="muted">{signals.filter((s) => s.done).length} of {signals.length} prep items complete.</p>
+        </div>
+      </div>
+
       <div className="action-banner">
         <span>Next best action</span>
         <strong>{getSuggestedNextAction(guest)}</strong>
@@ -42,6 +56,7 @@ export default function GuestDetailPage({ guest, upsertGuest, deleteGuest, openP
       <div className="button-row">
         <button onClick={() => setEditing((value) => !value)}>{editing ? 'Close edit' : 'Edit guest'}</button>
         <button onClick={() => openPortal(guest.id)}>Open portal</button>
+        <CopyLinkButton value={guestPortalUrl(guest)} />
         <button className="danger" onClick={() => deleteGuest(guest.id)}>Delete</button>
       </div>
 

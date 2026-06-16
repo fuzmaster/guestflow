@@ -38,14 +38,18 @@ export default function PipelinePage({ guests, setSelectedGuestId, upsertGuest }
               <strong>{getStageLabel(stage)}</strong>
               <span>{grouped[stage].length}</span>
             </div>
-            {grouped[stage].map((guest) => (
-              <div key={guest.id} className="pipeline-card-wrap">
-                <GuestCard guest={guest} onClick={() => setSelectedGuestId(guest.id)} />
-                <select value={guest.stage} onChange={(event) => upsertGuest({ ...guest, stage: event.target.value as GuestStage })}>
-                  {STAGES.map((nextStage) => <option key={nextStage} value={nextStage}>{getStageLabel(nextStage)}</option>)}
-                </select>
-              </div>
-            ))}
+            {grouped[stage].length === 0 ? (
+              <p className="kanban-empty">No one here yet.</p>
+            ) : (
+              grouped[stage].map((guest) => (
+                <div key={guest.id} className="pipeline-card-wrap">
+                  <GuestCard guest={guest} onClick={() => setSelectedGuestId(guest.id)} />
+                  <select value={guest.stage} onChange={(event) => upsertGuest({ ...guest, stage: event.target.value as GuestStage })}>
+                    {STAGES.map((nextStage) => <option key={nextStage} value={nextStage}>{getStageLabel(nextStage)}</option>)}
+                  </select>
+                </div>
+              ))
+            )}
           </section>
         ))}
       </div>

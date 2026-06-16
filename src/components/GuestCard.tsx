@@ -1,7 +1,9 @@
 import type { Guest } from '../types';
 import { formatDate, isOverdue } from '../lib/dates';
 import { getMissingAssets, getShareChecklistProgress, getSuggestedNextAction } from '../lib/guestLogic';
+import { getReadinessScore } from '../lib/readiness';
 import StatusPill from './StatusPill';
+import ReadinessRing from './ReadinessRing';
 
 type Props = {
   guest: Guest;
@@ -11,10 +13,14 @@ type Props = {
 export default function GuestCard({ guest, onClick }: Props) {
   const missing = getMissingAssets(guest);
   const share = getShareChecklistProgress(guest);
+  const score = getReadinessScore(guest);
   return (
     <button className="guest-card" onClick={onClick}>
       <div className="card-topline">
-        <strong>{guest.name}</strong>
+        <div className="card-topline__left">
+          <ReadinessRing score={score} size={36} label={`${score}% ready`} />
+          <strong>{guest.name}</strong>
+        </div>
         <StatusPill stage={guest.stage} />
       </div>
       <p className="muted">{guest.company || guest.showName}</p>

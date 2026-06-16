@@ -10,15 +10,31 @@ import LaunchSharePage from './pages/LaunchSharePage';
 import TemplatesPage from './pages/TemplatesPage';
 import SettingsPage from './pages/SettingsPage';
 import GuestPortalPage from './pages/GuestPortalPage';
+import NextActionsPage from './pages/NextActionsPage';
+import WelcomePage from './pages/WelcomePage';
+import Footer from './components/Footer';
+
+const WELCOMED_KEY = 'guestflow.welcomed.v1';
+
+function initialPage(): Page {
+  const params = new URLSearchParams(window.location.search);
+  if (params.has('welcome')) return 'welcome';
+  const welcomed = localStorage.getItem(WELCOMED_KEY);
+  return welcomed ? 'next-actions' : 'welcome';
+}
 
 export default function App() {
   const [guests, setGuests] = useState<Guest[]>(() => loadGuests());
-  const [page, setPage] = useState<Page>('today');
+  const [page, setPage] = useState<Page>(() => initialPage());
   const [selectedGuestId, setSelectedGuestId] = useState<string | null>(null);
 
   useEffect(() => {
     saveGuests(guests);
   }, [guests]);
+
+  useEffect(() => {
+    if (page !== 'welcome') localStorage.setItem(WELCOMED_KEY, '1');
+  }, [page]);
 
   const selectedGuest = useMemo(
     () => guests.find((guest) => guest.id === selectedGuestId) ?? guests[0],
@@ -50,8 +66,20 @@ export default function App() {
     setPage(targetPage);
   }
 
+  if (page === 'welcome') {
+    return (
+      <div className="welcome-shell">
+        <WelcomePage onEnter={() => setPage('next-actions')} />
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <AppShell page={page} setPage={setPage} guestCount={guests.length}>
+      {page === 'next-actions' && (
+        <NextActionsPage guests={guests} openGuest={openGuest} upsertGuest={updateGuestInline} />
+      )}
       {page === 'today' && <TodayPage guests={guests} openGuest={openGuest} />}
       {page === 'pipeline' && (
         <PipelinePage

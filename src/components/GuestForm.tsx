@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import type { AssetStatus, ContactChannel, Guest, GuestStage } from '../types';
 import { STAGES } from '../lib/guestLogic';
 import { slugify } from '../lib/slug';
+import { applyShowDefaults, loadShowDefaults } from '../lib/showDefaults';
 
 const channels: ContactChannel[] = ['email', 'instagram', 'linkedin', 'phone', 'other'];
 const assetStatuses: AssetStatus[] = ['needed', 'requested', 'received', 'not_needed'];
@@ -72,7 +73,7 @@ type Props = {
 };
 
 export default function GuestForm({ guest, onSave, onCancel }: Props) {
-  const initial = useMemo(() => guest ?? createBlankGuest(), [guest]);
+  const initial = useMemo(() => guest ?? applyShowDefaults(createBlankGuest(), loadShowDefaults()), [guest]);
   const [draft, setDraft] = useState<Guest>(initial);
 
   function update<K extends keyof Guest>(key: K, value: Guest[K]) {

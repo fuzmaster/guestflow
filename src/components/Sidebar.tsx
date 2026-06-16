@@ -1,6 +1,7 @@
 import type { Page } from '../types';
 
 const nav: { id: Page; label: string }[] = [
+  { id: 'next-actions', label: 'Next Actions' },
   { id: 'today', label: 'Today' },
   { id: 'pipeline', label: 'Guest Pipeline' },
   { id: 'guest-portal', label: 'Guest Portal' },
@@ -19,13 +20,13 @@ type Props = {
 export default function Sidebar({ page, setPage, guestCount }: Props) {
   return (
     <aside className="sidebar">
-      <div className="brand">
+      <button className="brand brand-button" onClick={() => setPage('welcome')}>
         <div className="brand-mark">GF</div>
         <div>
           <h1>GuestFlow</h1>
           <p>{guestCount} guests tracked</p>
         </div>
-      </div>
+      </button>
       <div className="sidebar-note">
         <strong>One link for guests.</strong>
         <span>One dashboard for producers.</span>

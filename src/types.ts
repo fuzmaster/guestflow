@@ -100,6 +100,8 @@ export type Template = {
 };
 
 export type Page =
+  | 'welcome'
+  | 'next-actions'
   | 'today'
   | 'pipeline'
   | 'guest-portal'
