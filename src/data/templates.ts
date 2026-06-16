@@ -1,0 +1,88 @@
+import type { Template } from '../types';
+
+export const templates: Template[] = [
+  {
+    id: 'tpl-001',
+    name: 'First invite',
+    category: 'invite',
+    channel: 'email',
+    body: 'Hey {guestName}, I host {showName} and think you would be a great guest. Would you be open to joining us for a practical conversation about your work?',
+  },
+  {
+    id: 'tpl-002',
+    name: 'Soft follow-up',
+    category: 'follow_up',
+    channel: 'email',
+    body: 'Hey {guestName}, just wanted to float this back to the top. Still think you would be a strong fit for {showName}. Want me to send a few recording options?',
+  },
+  {
+    id: 'tpl-003',
+    name: 'Still interested?',
+    category: 'follow_up',
+    channel: 'email',
+    body: 'Hey {guestName}, no pressure either way — are you still interested in coming on {showName}? If timing is bad, I can circle back later.',
+  },
+  {
+    id: 'tpl-004',
+    name: 'Booking confirmation',
+    category: 'booking',
+    channel: 'email',
+    body: 'Confirmed for {recordingDate}. Excited to have you on {showName}. I’ll send the final recording details and anything we need before then.',
+  },
+  {
+    id: 'tpl-005',
+    name: 'Day-before recording reminder',
+    category: 'recording_reminder',
+    channel: 'email',
+    body: 'Hey {guestName}, quick reminder that we’re recording tomorrow for {showName}. Looking forward to it. Let me know if anything changed on your end.',
+  },
+  {
+    id: 'tpl-006',
+    name: 'Missing bio/headshot request',
+    category: 'asset_request',
+    channel: 'email',
+    body: 'Hey {guestName}, can you send over a short bio, headshot, and best social handle for the episode graphics? That will help us get everything ready cleanly.',
+  },
+  {
+    id: 'tpl-007',
+    name: 'Episode launches tomorrow',
+    category: 'launch',
+    channel: 'email',
+    body: 'Hey {guestName}, your episode of {showName} launches tomorrow: {episodeTitle}. I’ll send the live link and clips once it is up.',
+  },
+  {
+    id: 'tpl-008',
+    name: 'Episode is live',
+    category: 'launch',
+    channel: 'email',
+    body: 'Hey {guestName}, your episode is live: {episodeLink}. Really appreciate you joining {showName}. I’ll send clips and suggested copy you can use to share it.',
+  },
+  {
+    id: 'tpl-009',
+    name: 'Accept Instagram collab reminder',
+    category: 'collab',
+    channel: 'instagram',
+    body: 'Hey {guestName}, I sent the Instagram collab invite for your episode. Could you accept it when you get a chance? That will make sure it shows on both profiles.',
+  },
+  {
+    id: 'tpl-010',
+    name: 'Please share this clip',
+    category: 'post_launch',
+    channel: 'email',
+    body: 'Hey {guestName}, this clip from {episodeTitle} is a strong one. If you’re open to sharing it, here’s the link: {episodeLink}',
+  },
+  {
+    id: 'tpl-011',
+    name: 'Thank-you message',
+    category: 'post_launch',
+    channel: 'email',
+    body: 'Hey {guestName}, thanks again for joining {showName}. Really appreciate your time and the conversation.',
+  },
+  {
+    id: 'tpl-012',
+    name: 'Referral request',
+    category: 'referral',
+    channel: 'email',
+    body: 'Hey {guestName}, one quick ask — is there anyone you think would be a strong guest for {showName}? Happy to mention you sent them our way.',
+  },
+];
