@@ -11,6 +11,7 @@ export type PublicGuestData = Pick<
   | 'name'
   | 'showName'
   | 'episodeTitle'
+  | 'stage'
   | 'recordingDate'
   | 'launchDate'
   | 'hostName'
@@ -21,15 +22,27 @@ export type PublicGuestData = Pick<
   | 'parkingNotes'
   | 'arrivalInstructions'
   | 'recordingPrepNotes'
+  | 'showInstructions'
   | 'calendarLink'
   | 'recordingLink'
+  | 'recordingType'
+  | 'riversideLink'
+  | 'availableDates'
+  | 'selectedDateId'
+  | 'confirmedDateId'
+  | 'transcriptStatus'
+  | 'transcriptLink'
   | 'releaseFormLink'
   | 'pressKitLink'
   | 'youtubeLink'
   | 'spotifyLink'
   | 'appleLink'
   | 'episodeLink'
+  | 'websiteEpisodeLink'
   | 'clipLinks'
+  | 'suggestedPostCopy'
+  | 'teamShareMessage'
+  | 'messages'
   | 'guestPortalSlug'
   | 'bioStatus'
   | 'headshotStatus'
@@ -50,6 +63,7 @@ function toPublicGuest(guest: Guest): PublicGuestData {
     name: guest.name,
     showName: guest.showName,
     episodeTitle: guest.episodeTitle,
+    stage: guest.stage,
     recordingDate: guest.recordingDate,
     launchDate: guest.launchDate,
     hostName: guest.hostName,
@@ -60,15 +74,27 @@ function toPublicGuest(guest: Guest): PublicGuestData {
     parkingNotes: guest.parkingNotes,
     arrivalInstructions: guest.arrivalInstructions,
     recordingPrepNotes: guest.recordingPrepNotes,
+    showInstructions: guest.showInstructions,
     calendarLink: guest.calendarLink,
     recordingLink: guest.recordingLink,
+    recordingType: guest.recordingType,
+    riversideLink: guest.riversideLink,
+    availableDates: guest.availableDates,
+    selectedDateId: guest.selectedDateId,
+    confirmedDateId: guest.confirmedDateId,
+    transcriptStatus: guest.transcriptStatus,
+    transcriptLink: guest.transcriptLink,
     releaseFormLink: guest.releaseFormLink,
     pressKitLink: guest.pressKitLink,
     youtubeLink: guest.youtubeLink,
     spotifyLink: guest.spotifyLink,
     appleLink: guest.appleLink,
     episodeLink: guest.episodeLink,
+    websiteEpisodeLink: guest.websiteEpisodeLink,
     clipLinks: guest.clipLinks,
+    suggestedPostCopy: guest.suggestedPostCopy,
+    teamShareMessage: guest.teamShareMessage,
+    messages: guest.messages.filter((m) => m.visibility === 'guest_visible'),
     guestPortalSlug: guest.guestPortalSlug,
     bioStatus: guest.bioStatus,
     headshotStatus: guest.headshotStatus,

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
-import type { ClipLink, ClipPlatform, Guest } from '../types';
+import type { ClipLink, ClipPlatform, Guest, GuestNote } from '../types';
 import { guestPortalUrl } from '../lib/portal';
+import { shareKitUrl } from '../lib/shareKit';
 import CopyLinkButton from '../components/CopyLinkButton';
 import PortalPreview from '../components/PortalPreview';
 
@@ -118,14 +119,43 @@ export default function GuestPortalPage({ guests, selectedGuest, setSelectedGues
             </select>
           </label>
           <div className="share-control">
-            <CopyLinkButton value={guestPortalUrl(guest)} label="Copy share link" />
-            <p className="share-warning">Anyone with this link sees the portal. Don't post it publicly.</p>
+            <CopyLinkButton value={guestPortalUrl(guest)} label="Copy portal link" />
+            <CopyLinkButton value={shareKitUrl(guest)} label="Copy share kit" />
+            <p className="share-warning">Anyone with these links sees the portal. Don't post them publicly.</p>
           </div>
           <button className="btn-ghost" onClick={() => setMode(mode === 'preview' ? 'edit' : 'preview')}>{mode === 'preview' ? 'Edit portal' : 'Preview portal'}</button>
         </div>
       </div>
 
-      {mode === 'preview' ? <PortalPreview guest={guest} voice="producer" /> : <PortalEditor guest={guest} upsertGuest={upsertGuest} />}
+      {mode === 'preview' ? (
+        <PortalPreview
+          guest={guest}
+          voice="producer"
+          onDatePicked={(dateId) => {
+            const date = guest.availableDates.find((d) => d.id === dateId);
+            const updated = guest.availableDates.map((d) =>
+              d.id === dateId
+                ? { ...d, status: 'selected' as const }
+                : d.status === 'selected'
+                ? { ...d, status: 'open' as const }
+                : d,
+            );
+            upsertGuest({
+              ...guest,
+              availableDates: updated,
+              selectedDateId: dateId,
+              stage: 'date_selected',
+              recordingDate: date?.date ?? guest.recordingDate,
+            });
+          }}
+          onNoteSubmit={(body, type) => {
+            const note: GuestNote = { id: crypto.randomUUID(), createdAt: new Date().toISOString(), body, type };
+            upsertGuest({ ...guest, guestNotes: [note, ...guest.guestNotes] });
+          }}
+        />
+      ) : (
+        <PortalEditor guest={guest} upsertGuest={upsertGuest} />
+      )}
     </div>
   );
 }

@@ -9,22 +9,22 @@ export default function WelcomePage({ onEnter }: Props) {
     <div className="welcome">
       <div className="welcome__strip">
         <div className="welcome__strip-left">
-          <strong>GuestFlow</strong>
+          <strong>High Functioning</strong>
           <span className="welcome__strip-divider" />
-          <span>Run of Show</span>
+          <span>Guest Portal · Internal v1</span>
         </div>
         <div className="welcome__strip-right">
           <span className="welcome__strip-dot" />
-          <span>Local-first · No backend</span>
+          <span>Powered by GuestFlow · Local-first</span>
         </div>
       </div>
 
       <div className="welcome__container">
         <header>
-          <span className="welcome__chip">For podcast &amp; interview producers</span>
+          <span className="welcome__chip">High Functioning Podcast · Producer console</span>
           <h1 className="welcome__title">Send one link. Stop chasing guests.</h1>
           <p className="welcome__sub">
-            One portal per guest — recording details, missing-asset reminders, launch links, clips, and ready-to-paste captions. Producers stop digging through Gmail, DMs, and Drive.
+            Everything guests need before and after recording — recording date, studio details, parking, missing info, and the launch share kit — in one portal link. Producers stop juggling email, DMs, and spreadsheets.
           </p>
           <div className="welcome__cta">
             <button className="btn-primary" onClick={onEnter}>Open dashboard →</button>

@@ -8,6 +8,11 @@ export type ReadinessSignal = {
 
 export function getReadinessSignals(guest: Guest): ReadinessSignal[] {
   return [
+    {
+      key: 'date_selected',
+      label: 'Recording date selected',
+      done: Boolean(guest.selectedDateId || guest.confirmedDateId || guest.recordingDate),
+    },
     { key: 'recording_date', label: 'Recording date set', done: Boolean(guest.recordingDate) },
     {
       key: 'location_or_link',

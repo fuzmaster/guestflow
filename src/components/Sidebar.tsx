@@ -9,7 +9,7 @@ const DAILY: NavItem[] = [
 const WORK: NavItem[] = [
   { id: 'pipeline', label: 'Guest Pipeline' },
   { id: 'guest-portal', label: 'Guest Portal' },
-  { id: 'missing-assets', label: 'Missing Assets' },
+  { id: 'missing-assets', label: 'Missing Info' },
   { id: 'launch-share', label: 'Launch & Share' },
 ];
 const META: NavItem[] = [
@@ -51,11 +51,11 @@ export default function Sidebar({ page, setPage, guestCount }: Props) {
           title="Open welcome"
           onClick={() => setPage('welcome')}
         >
-          GF
+          HF
         </button>
         <div>
-          <div className="brand-wordmark">GuestFlow</div>
-          <div className="brand-meta">{guestCount} guests · Local</div>
+          <div className="brand-wordmark">High Functioning</div>
+          <div className="brand-meta">Guest Portal · {guestCount} guests</div>
         </div>
       </div>
 
@@ -70,7 +70,8 @@ export default function Sidebar({ page, setPage, guestCount }: Props) {
       <div className="sidebar-mandate">
         <p className="eyebrow">Mandate</p>
         <strong>One link for guests.</strong>
-        <span>One dashboard for producers.</span>
+        <span>Everything they need before and after recording.</span>
+        <span className="sidebar-mandate__powered">Powered by GuestFlow</span>
       </div>
     </aside>
   );

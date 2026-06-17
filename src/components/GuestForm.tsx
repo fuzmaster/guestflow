@@ -1,69 +1,15 @@
 import { useMemo, useState } from 'react';
 import type { AssetStatus, ContactChannel, Guest, GuestStage } from '../types';
-import { STAGES } from '../lib/guestLogic';
+import { STAGES, getStageLabel } from '../lib/guestLogic';
 import { slugify } from '../lib/slug';
 import { applyShowDefaults, loadShowDefaults } from '../lib/showDefaults';
+import { normalizeGuest } from '../lib/storage';
 
 const channels: ContactChannel[] = ['email', 'instagram', 'linkedin', 'phone', 'other'];
 const assetStatuses: AssetStatus[] = ['needed', 'requested', 'received', 'not_needed'];
 
 function createBlankGuest(): Guest {
-  const today = new Date().toISOString().slice(0, 10);
-  const id = crypto.randomUUID();
-  return {
-    id,
-    name: '',
-    company: '',
-    title: '',
-    email: '',
-    instagram: '',
-    linkedin: '',
-    phone: '',
-    showName: '',
-    episodeTitle: '',
-    stage: 'target',
-    preferredChannel: 'email',
-    lastContactedAt: '',
-    lastResponseAt: '',
-    nextFollowUpAt: '',
-    recordingDate: '',
-    launchDate: '',
-    bioStatus: 'needed',
-    headshotStatus: 'needed',
-    socialHandleStatus: 'needed',
-    releaseFormStatus: 'needed',
-    episodeLinkSent: false,
-    clipsSent: false,
-    suggestedCopySent: false,
-    instagramCollabInviteSent: false,
-    instagramCollabAccepted: false,
-    guestShared: false,
-    thankYouSent: false,
-    notes: '',
-    tags: [],
-    hostName: '',
-    hostEmail: '',
-    producerName: '',
-    producerEmail: '',
-    interviewLocationName: '',
-    interviewAddress: '',
-    parkingNotes: '',
-    arrivalInstructions: '',
-    recordingPrepNotes: '',
-    calendarLink: '',
-    recordingLink: '',
-    episodeLink: '',
-    spotifyLink: '',
-    appleLink: '',
-    youtubeLink: '',
-    pressKitLink: '',
-    releaseFormLink: '',
-    clipLinks: [],
-    guestPortalSlug: id,
-    guestPortalEnabled: true,
-    createdAt: today,
-    updatedAt: today,
-  };
+  return normalizeGuest({ stage: 'lead' });
 }
 
 type Props = {
@@ -100,7 +46,7 @@ export default function GuestForm({ guest, onSave, onCancel }: Props) {
         <label>Phone<input value={draft.phone ?? ''} onChange={(e) => update('phone', e.target.value)} /></label>
         <label>Show name<input value={draft.showName} onChange={(e) => update('showName', e.target.value)} /></label>
         <label>Episode title<input value={draft.episodeTitle ?? ''} onChange={(e) => update('episodeTitle', e.target.value)} /></label>
-        <label>Stage<select value={draft.stage} onChange={(e) => update('stage', e.target.value as GuestStage)}>{STAGES.map((stage) => <option key={stage} value={stage}>{stage.replace(/_/g, ' ')}</option>)}</select></label>
+        <label>Stage<select value={draft.stage} onChange={(e) => update('stage', e.target.value as GuestStage)}>{STAGES.map((stage) => <option key={stage} value={stage}>{getStageLabel(stage)}</option>)}</select></label>
         <label>Preferred channel<select value={draft.preferredChannel} onChange={(e) => update('preferredChannel', e.target.value as ContactChannel)}>{channels.map((channel) => <option key={channel}>{channel}</option>)}</select></label>
         <label>Last contacted<input type="date" value={draft.lastContactedAt ?? ''} onChange={(e) => update('lastContactedAt', e.target.value)} /></label>
         <label>Last response<input type="date" value={draft.lastResponseAt ?? ''} onChange={(e) => update('lastResponseAt', e.target.value)} /></label>

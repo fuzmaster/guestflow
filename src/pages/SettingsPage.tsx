@@ -14,20 +14,28 @@ type DefaultField = {
 
 const FIELDS: DefaultField[] = [
   { key: 'showName', label: 'Show name' },
+  { key: 'portalTitle', label: 'Portal title' },
   { key: 'hostName', label: 'Host name' },
   { key: 'hostEmail', label: 'Host email' },
   { key: 'producerName', label: 'Producer name' },
   { key: 'producerEmail', label: 'Producer email' },
-  { key: 'interviewLocationName', label: 'Default location name' },
-  { key: 'interviewAddress', label: 'Default address' },
+  { key: 'producerPhone', label: 'Producer phone' },
+  { key: 'interviewLocationName', label: 'Studio name' },
+  { key: 'interviewAddress', label: 'Studio address' },
   { key: 'releaseFormLink', label: 'Release form link' },
   { key: 'pressKitLink', label: 'Press kit link' },
   { key: 'youtubeLink', label: 'Default YouTube URL' },
   { key: 'spotifyLink', label: 'Default Spotify URL' },
   { key: 'appleLink', label: 'Default Apple Podcasts URL' },
-  { key: 'parkingNotes', label: 'Default parking notes', type: 'textarea' },
-  { key: 'arrivalInstructions', label: 'Default arrival instructions', type: 'textarea' },
-  { key: 'recordingPrepNotes', label: 'Default recording prep notes', type: 'textarea' },
+  { key: 'websiteEpisodeLink', label: 'Default website episode URL' },
+  { key: 'instagramHandle', label: 'Instagram handle' },
+  { key: 'tiktokHandle', label: 'TikTok handle' },
+  { key: 'linkedinPage', label: 'LinkedIn page' },
+  { key: 'websiteUrl', label: 'Show website' },
+  { key: 'parkingNotes', label: 'Parking instructions', type: 'textarea' },
+  { key: 'arrivalInstructions', label: 'Arrival instructions', type: 'textarea' },
+  { key: 'recordingPrepNotes', label: 'Default prep notes', type: 'textarea' },
+  { key: 'showInstructions', label: 'Show instructions for guests', type: 'textarea' },
 ];
 
 export default function SettingsPage({ guests, setGuests }: { guests: Guest[]; setGuests: (guests: Guest[]) => void }) {

@@ -1,7 +1,9 @@
 {
   "rewrites": [
     { "source": "/g/:slug", "destination": "/" },
-    { "source": "/g/:slug/:path*", "destination": "/" }
+    { "source": "/g/:slug/:path*", "destination": "/" },
+    { "source": "/share/:slug", "destination": "/" },
+    { "source": "/share/:slug/:path*", "destination": "/" }
   ],
   "headers": [
     {

@@ -13,12 +13,17 @@ import GuestPortalPage from './pages/GuestPortalPage';
 import NextActionsPage from './pages/NextActionsPage';
 import WelcomePage from './pages/WelcomePage';
 import PublicGuestPortal from './pages/PublicGuestPortal';
+import PublicShareKit from './pages/PublicShareKit';
 import Footer from './components/Footer';
 
 const WELCOMED_KEY = 'guestflow.welcomed.v1';
 
 function isPublicPortalPath(): boolean {
   return typeof window !== 'undefined' && window.location.pathname.startsWith('/g/');
+}
+
+function isPublicSharePath(): boolean {
+  return typeof window !== 'undefined' && window.location.pathname.startsWith('/share/');
 }
 
 function initialPage(): Page {
@@ -30,10 +35,14 @@ function initialPage(): Page {
 
 export default function App() {
   const [isPublic] = useState<boolean>(() => isPublicPortalPath());
+  const [isShare] = useState<boolean>(() => isPublicSharePath());
   const [guests, setGuests] = useState<Guest[]>(() => loadGuests());
   const [page, setPage] = useState<Page>(() => initialPage());
   const [selectedGuestId, setSelectedGuestId] = useState<string | null>(null);
 
+  if (isShare) {
+    return <PublicShareKit onOpenApp={() => { window.location.href = '/'; }} />;
+  }
   if (isPublic) {
     return <PublicGuestPortal onOpenApp={() => { window.location.href = '/'; }} />;
   }
