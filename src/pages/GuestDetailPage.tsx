@@ -30,21 +30,23 @@ export default function GuestDetailPage({ guest, upsertGuest, deleteGuest, openP
   }
 
   return (
-    <aside className="detail-panel">
-      <div className="card-topline">
+    <aside className="detail-panel gf-scroll">
+      <div className="detail-panel__head">
         <div>
-          <p className="eyebrow">Guest Detail</p>
+          <p className="eyebrow">Guest detail</p>
           <h2>{guest.name}</h2>
-          <p className="muted">{guest.title} {guest.company ? `· ${guest.company}` : ''}</p>
+          <p className="detail-panel__meta">{guest.title}{guest.title && guest.company ? ' · ' : ''}{guest.company}</p>
         </div>
         <StatusPill stage={guest.stage} />
       </div>
 
       <div className="readiness-banner">
-        <ReadinessRing score={score} size={72} label={`${score}% ready`} />
+        <ReadinessRing score={score} size={72} strokeWidth={4} />
         <div>
           <strong>{score}% ready</strong>
-          <p className="muted">{signals.filter((s) => s.done).length} of {signals.length} prep items complete.</p>
+          <p className="muted" style={{ fontSize: 12, margin: 0 }}>
+            {signals.filter((s) => s.done).length} of {signals.length} prep items complete.
+          </p>
         </div>
       </div>
 
@@ -54,10 +56,10 @@ export default function GuestDetailPage({ guest, upsertGuest, deleteGuest, openP
       </div>
 
       <div className="button-row">
-        <button onClick={() => setEditing((value) => !value)}>{editing ? 'Close edit' : 'Edit guest'}</button>
-        <button onClick={() => openPortal(guest.id)}>Open portal</button>
-        <CopyLinkButton value={guestPortalUrl(guest)} />
-        <button className="danger" onClick={() => deleteGuest(guest.id)}>Delete</button>
+        <button className="btn-ghost btn-sm" onClick={() => setEditing((value) => !value)}>{editing ? 'Close edit' : 'Edit guest'}</button>
+        <button className="btn-ghost btn-sm" onClick={() => openPortal(guest.id)}>Open portal</button>
+        <CopyLinkButton value={guestPortalUrl(guest)} label="Copy link" />
+        <button className="btn-danger" onClick={() => deleteGuest(guest.id)}>Delete</button>
       </div>
 
       {editing ? (
@@ -77,14 +79,14 @@ export default function GuestDetailPage({ guest, upsertGuest, deleteGuest, openP
             <p>Episode: {guest.episodeTitle || 'Not set'}</p>
             <p>Recording: {formatDate(guest.recordingDate)}</p>
             <p>Launch: {formatDate(guest.launchDate)}</p>
-            <p>Guest portal: guestflow.app/g/{guest.guestPortalSlug}</p>
+            <p>Portal: guestflow.app/g/{guest.guestPortalSlug}</p>
           </section>
           <section>
             <h3>Follow-up</h3>
             <p>Last contacted: {formatDate(guest.lastContactedAt)}</p>
             <p>Last response: {formatDate(guest.lastResponseAt)}</p>
             <label>Next follow-up<input type="date" value={guest.nextFollowUpAt ?? ''} onChange={(e) => update('nextFollowUpAt', e.target.value)} /></label>
-            <p>{guest.notes}</p>
+            {guest.notes && <p style={{ marginTop: 10, color: 'var(--muted)' }}>{guest.notes}</p>}
           </section>
           <section>
             <h3>Asset checklist</h3>
@@ -94,13 +96,17 @@ export default function GuestDetailPage({ guest, upsertGuest, deleteGuest, openP
               ['socialHandleStatus', 'Social handles'],
               ['releaseFormStatus', 'Release form'],
             ] as const).map(([key, label]) => (
-              <label className="inline-label" key={key}>{label}<select value={guest[key]} onChange={(e) => update(key, e.target.value as AssetStatus)}>{assetOptions.map((status) => <option key={status}>{status}</option>)}</select></label>
+              <label className="inline-label" key={key}>{label}
+                <select value={guest[key]} onChange={(e) => update(key, e.target.value as AssetStatus)}>
+                  {assetOptions.map((status) => <option key={status}>{status}</option>)}
+                </select>
+              </label>
             ))}
-            <p className="muted">Missing: {getMissingAssets(guest).join(', ') || 'None'}</p>
+            <p className="muted" style={{ fontSize: 12, marginTop: 8 }}>Missing: {getMissingAssets(guest).join(', ') || 'None'}</p>
           </section>
           <section>
             <h3>Launch / share checklist</h3>
-            <p className="muted">Progress: {share.label}</p>
+            <p className="muted" style={{ fontSize: 12 }}>Progress: {share.label}</p>
             <ChecklistItem label="Episode link sent" checked={guest.episodeLinkSent} onChange={(value) => update('episodeLinkSent', value)} />
             <ChecklistItem label="Clips sent" checked={guest.clipsSent} onChange={(value) => update('clipsSent', value)} />
             <ChecklistItem label="Suggested copy sent" checked={guest.suggestedCopySent} onChange={(value) => update('suggestedCopySent', value)} />

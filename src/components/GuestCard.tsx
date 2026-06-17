@@ -18,17 +18,17 @@ export default function GuestCard({ guest, onClick }: Props) {
     <button className="guest-card" onClick={onClick}>
       <div className="card-topline">
         <div className="card-topline__left">
-          <ReadinessRing score={score} size={36} label={`${score}% ready`} />
+          <ReadinessRing score={score} size={36} />
           <strong>{guest.name}</strong>
         </div>
         <StatusPill stage={guest.stage} />
       </div>
-      <p className="muted">{guest.company || guest.showName}</p>
+      <p className="muted" style={{ fontSize: 12, margin: 0 }}>{guest.company || guest.showName}</p>
       <div className="card-grid">
-        <span>Next: {formatDate(guest.nextFollowUpAt)}</span>
-        {isOverdue(guest.nextFollowUpAt) && <span className="warn-text">Overdue</span>}
-        <span>Missing: {missing.length}</span>
-        <span>Share: {share.label}</span>
+        <span>Next · {formatDate(guest.nextFollowUpAt)}</span>
+        {isOverdue(guest.nextFollowUpAt) ? <span className="warn-text">Overdue</span> : <span>·</span>}
+        <span>Miss · {missing.length}</span>
+        <span>Share · {share.label}</span>
       </div>
       <div className="next-action">{getSuggestedNextAction(guest)}</div>
     </button>

@@ -1,11 +1,12 @@
 import { useMemo, useState } from 'react';
-import type { ClipLink, ClipPlatform, Guest } from '../types';
+import type { AssetStatus, ClipLink, ClipPlatform, Guest } from '../types';
 import { formatDate } from '../lib/dates';
 import { getMissingAssets, getShareChecklistProgress } from '../lib/guestLogic';
 import { getReadinessScore, getReadinessSentence, getReadinessSignals } from '../lib/readiness';
 import { guestPortalUrl } from '../lib/portal';
 import CopyLinkButton from '../components/CopyLinkButton';
 import ReadinessRing from '../components/ReadinessRing';
+import WaveBar from '../components/WaveBar';
 
 const clipPlatforms: ClipPlatform[] = ['instagram', 'tiktok', 'youtube', 'linkedin', 'other'];
 
@@ -16,31 +17,45 @@ type Props = {
   upsertGuest: (guest: Guest) => void;
 };
 
-function LinkButton({ label, url }: { label: string; url?: string }) {
-  if (!url) return <span className="portal-link portal-link--empty">{label} · Not added</span>;
-  return <a className="portal-link" href={url} target="_blank" rel="noreferrer">{label}</a>;
+function firstName(name: string) {
+  return name.split(/\s+/)[0] || name;
 }
 
-function CopyableCaption({ caption }: { caption: string }) {
-  const [copied, setCopied] = useState(false);
-  async function copy() {
-    if (!caption.trim()) return;
-    try {
-      await navigator.clipboard.writeText(caption);
-    } catch {
-      // ignore
-    }
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 1600);
+function CheckIcon({ status }: { status: 'done' | 'wait' | 'needed' }) {
+  if (status === 'done') {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="12" cy="12" r="10" fill="#72f2c7" fillOpacity="0.18" stroke="#72f2c7" strokeWidth="1.5" />
+        <path d="M7.5 12.3l3 3 6-6.6" stroke="#72f2c7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    );
+  }
+  if (status === 'wait') {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="12" cy="12" r="10" fill="none" stroke="#ffc857" strokeWidth="1.5" />
+        <path d="M12 7v5l3 2" stroke="#ffc857" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    );
   }
   return (
-    <div className="caption-block">
-      <p>{caption || 'No caption added yet.'}</p>
-      {caption.trim() && (
-        <button type="button" onClick={copy} className="caption-copy">{copied ? 'Copied' : 'Copy caption'}</button>
-      )}
-    </div>
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="12" cy="12" r="10" fill="none" stroke="#3a4868" strokeWidth="1.5" strokeDasharray="3 3" />
+    </svg>
   );
+}
+
+function assetIconStatus(status: AssetStatus): 'done' | 'wait' | 'needed' {
+  if (status === 'received' || status === 'not_needed') return 'done';
+  if (status === 'requested') return 'wait';
+  return 'needed';
+}
+
+function assetNote(status: AssetStatus, fallback: string): string {
+  if (status === 'received') return 'Received';
+  if (status === 'not_needed') return 'Not needed';
+  if (status === 'requested') return 'Requested — waiting';
+  return fallback;
 }
 
 function PortalPreview({ guest }: { guest: Guest }) {
@@ -49,153 +64,148 @@ function PortalPreview({ guest }: { guest: Guest }) {
   const missing = getMissingAssets(guest);
   const share = getShareChecklistProgress(guest);
   const liveLinks = [guest.youtubeLink, guest.spotifyLink, guest.appleLink, guest.episodeLink].filter(Boolean).length;
+  const sentence = getReadinessSentence(score).replace("You're", `${firstName(guest.name)} is`);
+
+  const checklist: { key: string; label: string; status: AssetStatus; fallback: string }[] = [
+    { key: 'bio', label: 'Bio', status: guest.bioStatus, fallback: 'Email a short third-person bio.' },
+    { key: 'headshot', label: 'Headshot', status: guest.headshotStatus, fallback: 'Send a high-res photo for graphics.' },
+    { key: 'socials', label: 'Social handles', status: guest.socialHandleStatus, fallback: 'Confirm Instagram and LinkedIn so we tag you correctly.' },
+    { key: 'release', label: 'Release form', status: guest.releaseFormStatus, fallback: 'Sign and return so we can publish without delay.' },
+  ];
 
   return (
-    <div className="portal-preview portal-v2">
-      <section className="portal-hero">
-        <div className="portal-hero__copy">
-          <p className="eyebrow">{guest.showName}</p>
-          <h2>Hi {guest.name.split(' ')[0] || guest.name},</h2>
-          <p className="portal-hero__sentence">{getReadinessSentence(score)}</p>
-          <p className="muted">Everything for your interview lives here. No emails to dig through.</p>
+    <div className="portal-page">
+      <section className="portal-pass">
+        <div className="portal-pass__strip">
+          <span className="accent">Boarding pass · Guest</span>
+          <span className="quiet">{guest.episodeTitle ? `· ${guest.episodeTitle}` : guest.showName}</span>
         </div>
-        <div className="portal-hero__score">
-          <ReadinessRing score={score} size={88} label={`${score}% ready`} />
-          <div className="portal-hero__stats">
-            <span><strong>{missing.length}</strong> missing</span>
-            <span><strong>{share.label}</strong> share steps</span>
-            <span><strong>{liveLinks}</strong> live links</span>
+        <div className="portal-pass__body">
+          <div className="portal-pass__wave"><WaveBar bars={28} size="sm" /></div>
+          <div className="portal-pass__inner">
+            <div className="portal-pass__ring-block">
+              <ReadinessRing score={score} size={188} strokeWidth={5} />
+              <div className="portal-pass__ring-stats">
+                <span><strong>{missing.length}</strong> miss</span>
+                <span><strong>{share.label}</strong> shared</span>
+                <span><strong>{liveLinks}</strong> links</span>
+              </div>
+            </div>
+            <div className="portal-pass__text">
+              <p className="eyebrow eyebrow--accent">{guest.showName}</p>
+              <h2>Hi {firstName(guest.name)},</h2>
+              <p className="sentence">{sentence}</p>
+              <p className="sub">Everything for your interview lives here. No emails to dig through.</p>
+            </div>
           </div>
         </div>
       </section>
 
       <section className="portal-section">
-        <header><p className="eyebrow">Before the Interview</p><h3>The basics, in one place.</h3></header>
-        <div className="portal-grid">
-          <article className="portal-card">
-            <h4>When</h4>
-            <p className="big-line">{formatDate(guest.recordingDate)}</p>
-            <p className="muted">Hosted by {guest.hostName || 'your host'}</p>
-            <div className="portal-links">
-              <LinkButton label="Calendar invite" url={guest.calendarLink} />
-              <LinkButton label="Remote recording link" url={guest.recordingLink} />
+        <header>
+          <p className="eyebrow">Before the interview</p>
+          <h3>The basics, in one place.</h3>
+        </header>
+        <div className="portal-block">
+          <div className="portal-block__when">
+            <div>
+              <p className="label">When</p>
+              <p className="big">{formatDate(guest.recordingDate)}</p>
+              <p className="sub">Hosted by {guest.hostName || 'your host'} · ~45–60 min</p>
+              <div className="button-row" style={{ marginTop: 16 }}>
+                {guest.calendarLink ? <a className="btn-ghost btn-sm" href={guest.calendarLink} target="_blank" rel="noreferrer">Calendar invite</a> : <span className="portal-chip portal-chip--empty">Calendar invite · soon</span>}
+                {guest.recordingLink ? <a className="btn-ghost btn-sm" href={guest.recordingLink} target="_blank" rel="noreferrer">Remote recording link</a> : <span className="portal-chip portal-chip--empty">Remote link · soon</span>}
+              </div>
             </div>
-          </article>
-          <article className="portal-card">
-            <h4>Where</h4>
-            <p className="big-line">{guest.interviewLocationName || 'Remote'}</p>
-            <p className="muted">{guest.interviewAddress || 'Address not added yet.'}</p>
-            <p><strong>Parking:</strong> {guest.parkingNotes || 'No parking notes yet.'}</p>
-          </article>
-          <article className="portal-card wide">
-            <h4>Arrival</h4>
-            <p>{guest.arrivalInstructions || 'Arrival instructions will appear here once your producer adds them.'}</p>
-          </article>
+            <div className="portal-block__where">
+              <p className="label">Where</p>
+              <p className="value">{guest.interviewLocationName || 'Remote'}</p>
+              <p className="address">{guest.interviewAddress || 'Address coming soon.'}</p>
+              {guest.parkingNotes && (
+                <p className="parking"><strong>Parking:</strong> {guest.parkingNotes}</p>
+              )}
+            </div>
+          </div>
+          {guest.arrivalInstructions && (
+            <div className="portal-block__arrival">
+              <p className="label">Arrival</p>
+              <p className="body">{guest.arrivalInstructions}</p>
+            </div>
+          )}
         </div>
       </section>
 
       <section className="portal-section">
-        <header><p className="eyebrow">What We Need From You</p><h3>{missing.length ? `Still waiting on ${missing.length}.` : 'You sent everything. Thank you.'}</h3></header>
-        <div className="portal-grid">
-          <article className="portal-card">
-            <h4>Bio</h4>
-            <AssetState status={guest.bioStatus} action="Email a short third-person bio (2–3 sentences)." />
-          </article>
-          <article className="portal-card">
-            <h4>Headshot</h4>
-            <AssetState status={guest.headshotStatus} action="Send a clean, high-res photo for episode graphics." />
-          </article>
-          <article className="portal-card">
-            <h4>Social handles</h4>
-            <AssetState status={guest.socialHandleStatus} action="Confirm your Instagram and LinkedIn so we tag you correctly." />
-          </article>
-          <article className="portal-card">
-            <h4>Release form</h4>
-            <AssetState status={guest.releaseFormStatus} action="Sign and return the release so we can publish without delay." />
-            <div className="portal-links">
-              <LinkButton label="Open release form" url={guest.releaseFormLink} />
-              <LinkButton label="Press kit folder" url={guest.pressKitLink} />
-            </div>
-          </article>
+        <header>
+          <p className="eyebrow">What we need from you</p>
+          <h3>{missing.length ? `Still waiting on ${missing.length}.` : 'You sent everything. Thank you.'}</h3>
+        </header>
+        <div className="portal-checklist">
+          {checklist.map((item) => {
+            const status = assetIconStatus(item.status);
+            return (
+              <div key={item.key} className={`portal-checklist__row is-${status}`}>
+                <div className="portal-checklist__icon"><CheckIcon status={status} /></div>
+                <div className="portal-checklist__label">{item.label}</div>
+                <div className="portal-checklist__note">{assetNote(item.status, item.fallback)}</div>
+              </div>
+            );
+          })}
         </div>
       </section>
 
       <section className="portal-section">
-        <header><p className="eyebrow">Recording Day</p><h3>What to expect.</h3></header>
-        <div className="portal-grid">
-          <article className="portal-card wide">
-            <h4>Prep notes</h4>
-            <p>{guest.recordingPrepNotes || 'Your producer will add prep notes here closer to the date.'}</p>
-          </article>
-          <article className="portal-card">
-            <h4>What to bring</h4>
-            <ul className="portal-bullets">
-              <li>Water</li>
-              <li>Two or three concrete stories with real details</li>
-              <li>No noisy jewelry, plain dark shirt if possible</li>
-            </ul>
-          </article>
-          <article className="portal-card">
-            <h4>What to expect</h4>
-            <ul className="portal-bullets">
+        <header>
+          <p className="eyebrow">Recording day</p>
+          <h3>What to expect.</h3>
+        </header>
+        <div className="portal-recording">
+          <div className="portal-recording__card">
+            <p className="label">Prep notes</p>
+            <p>{guest.recordingPrepNotes || 'Your producer will drop prep notes here closer to the date.'}</p>
+          </div>
+          <div className="portal-recording__card">
+            <p className="label">What to expect</p>
+            <ul>
               <li>Conversational, not scripted</li>
               <li>~45–60 minutes of recording</li>
               <li>Pause and restart anytime — we edit cleanly</li>
             </ul>
-          </article>
+          </div>
         </div>
       </section>
 
       <section className="portal-section">
-        <header><p className="eyebrow">After We Launch</p><h3>Episode is live{guest.launchDate ? ` ${formatDate(guest.launchDate)}` : ''}.</h3></header>
-        <div className="portal-grid">
-          <article className="portal-card wide">
-            <h4>Episode links</h4>
-            <div className="portal-links link-grid">
-              <LinkButton label="YouTube" url={guest.youtubeLink} />
-              <LinkButton label="Spotify" url={guest.spotifyLink} />
-              <LinkButton label="Apple Podcasts" url={guest.appleLink} />
-              <LinkButton label="Main episode" url={guest.episodeLink} />
-            </div>
-          </article>
-          <article className="portal-card">
-            <h4>Share checklist</h4>
-            <ul className="portal-checklist">
-              <li className={guest.episodeLinkSent ? 'done' : ''}>Episode link sent to you</li>
-              <li className={guest.clipsSent ? 'done' : ''}>Clips delivered</li>
-              <li className={guest.instagramCollabInviteSent ? 'done' : ''}>Instagram collab invite sent</li>
-              <li className={guest.instagramCollabAccepted ? 'done' : ''}>Collab accepted</li>
-              <li className={guest.guestShared ? 'done' : ''}>You shared the episode</li>
-            </ul>
-          </article>
+        <header>
+          <p className="eyebrow">After we launch</p>
+          <h3>{guest.launchDate ? `When the episode is live — ${formatDate(guest.launchDate)}.` : 'When the episode is live.'}</h3>
+        </header>
+        <div className="portal-chips">
+          {guest.youtubeLink ? <a className="portal-chip" href={guest.youtubeLink} target="_blank" rel="noreferrer">YouTube</a> : <span className="portal-chip portal-chip--empty">YouTube · soon</span>}
+          {guest.spotifyLink ? <a className="portal-chip" href={guest.spotifyLink} target="_blank" rel="noreferrer">Spotify</a> : <span className="portal-chip portal-chip--empty">Spotify · soon</span>}
+          {guest.appleLink ? <a className="portal-chip" href={guest.appleLink} target="_blank" rel="noreferrer">Apple Podcasts</a> : <span className="portal-chip portal-chip--empty">Apple · soon</span>}
+          {guest.episodeLink ? <a className="portal-chip" href={guest.episodeLink} target="_blank" rel="noreferrer">Main episode</a> : <span className="portal-chip portal-chip--empty">Main link · soon</span>}
         </div>
       </section>
 
       <section className="portal-section">
-        <header><p className="eyebrow">Clips & Captions</p><h3>Ready-to-post moments.</h3></header>
-        {guest.clipLinks.length ? (
-          <div className="clip-list">
-            {guest.clipLinks.map((clip) => (
-              <article key={clip.id} className="clip-card">
-                <div className="clip-card__head">
-                  <div>
-                    <strong>{clip.title}</strong>
-                    <p className="muted">{clip.platform || 'clip'}</p>
-                  </div>
-                  <a className="portal-link" href={clip.url} target="_blank" rel="noreferrer">Open clip</a>
-                </div>
-                <CopyableCaption caption={clip.suggestedCaption ?? ''} />
-              </article>
-            ))}
+        <header>
+          <p className="eyebrow">Clips &amp; captions</p>
+          <h3>Ready-to-post moments.</h3>
+        </header>
+        {guest.clipLinks.length === 0 ? (
+          <div className="empty-state">
+            <strong>Clips drop here after edits</strong>
+            <p>Your producer will add clips and copy-ready captions a few days after the recording.</p>
           </div>
         ) : (
-          <p className="muted portal-empty-note">Clips will appear here a few days after recording. Captions copy-ready.</p>
+          guest.clipLinks.map((clip) => <ClipCard key={clip.id} clip={clip} />)
         )}
       </section>
 
       <details className="portal-meta">
-        <summary>Readiness checklist ({signals.filter((signal) => signal.done).length} of {signals.length})</summary>
-        <ul className="portal-checklist">
+        <summary>Readiness checklist · {signals.filter((s) => s.done).length} of {signals.length}</summary>
+        <ul>
           {signals.map((signal) => (
             <li key={signal.key} className={signal.done ? 'done' : ''}>{signal.label}</li>
           ))}
@@ -205,19 +215,34 @@ function PortalPreview({ guest }: { guest: Guest }) {
   );
 }
 
-function AssetState({ status, action }: { status: Guest['bioStatus']; action: string }) {
-  const labels: Record<Guest['bioStatus'], string> = {
-    needed: 'Still needed',
-    requested: 'Requested',
-    received: 'Received',
-    not_needed: 'Not needed',
-  };
-  const tone = status === 'received' || status === 'not_needed' ? 'good' : 'wait';
+function ClipCard({ clip }: { clip: ClipLink }) {
+  const [copied, setCopied] = useState(false);
+  async function copy() {
+    if (!clip.suggestedCaption) return;
+    try {
+      await navigator.clipboard.writeText(clip.suggestedCaption);
+    } catch { /* noop */ }
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1600);
+  }
   return (
-    <>
-      <p className={`asset-state asset-state--${tone}`}>{labels[status]}</p>
-      {tone === 'wait' && <p className="muted">{action}</p>}
-    </>
+    <article className="portal-clip">
+      <div className="portal-clip__head">
+        <div>
+          <strong>{clip.title}</strong>
+          <p className="portal-clip__platform">{clip.platform || 'clip'}</p>
+        </div>
+        {clip.url && <a className="btn-ghost btn-sm" href={clip.url} target="_blank" rel="noreferrer">Open clip</a>}
+      </div>
+      {clip.suggestedCaption && (
+        <div className="portal-clip__caption">
+          <p>“{clip.suggestedCaption}”</p>
+        </div>
+      )}
+      {clip.suggestedCaption && (
+        <button type="button" className="btn-ghost btn-sm portal-clip__copy" onClick={copy}>{copied ? 'Copied' : 'Copy caption'}</button>
+      )}
+    </article>
   );
 }
 
@@ -250,7 +275,7 @@ function PortalEditor({ guest, upsertGuest }: { guest: Guest; upsertGuest: (gues
   }
 
   return (
-    <section className="form-card portal-editor">
+    <section className="portal-editor">
       <div className="form-grid">
         <label>Portal enabled<select value={String(draft.guestPortalEnabled)} onChange={(e) => update('guestPortalEnabled', e.target.value === 'true')}><option value="true">Enabled</option><option value="false">Disabled</option></select></label>
         <label>Portal slug<input value={draft.guestPortalSlug} onChange={(e) => update('guestPortalSlug', e.target.value)} /></label>
@@ -273,9 +298,9 @@ function PortalEditor({ guest, upsertGuest }: { guest: Guest; upsertGuest: (gues
       <label>Arrival instructions<textarea value={draft.arrivalInstructions ?? ''} onChange={(e) => update('arrivalInstructions', e.target.value)} /></label>
       <label>Recording prep notes<textarea value={draft.recordingPrepNotes ?? ''} onChange={(e) => update('recordingPrepNotes', e.target.value)} /></label>
 
-      <div className="card-topline">
-        <h3>Clip links</h3>
-        <button onClick={addClip}>Add clip</button>
+      <div className="button-row" style={{ justifyContent: 'space-between' }}>
+        <h3 style={{ margin: 0, fontSize: 16 }}>Clip links</h3>
+        <button className="btn-ghost btn-sm" onClick={addClip}>Add clip</button>
       </div>
       <div className="clip-editor-list">
         {draft.clipLinks.length === 0 && (
@@ -287,11 +312,11 @@ function PortalEditor({ guest, upsertGuest }: { guest: Guest; upsertGuest: (gues
             <label>URL<input value={clip.url} onChange={(e) => updateClip(clip.id, { url: e.target.value })} /></label>
             <label>Platform<select value={clip.platform ?? 'other'} onChange={(e) => updateClip(clip.id, { platform: e.target.value as ClipPlatform })}>{clipPlatforms.map((platform) => <option key={platform}>{platform}</option>)}</select></label>
             <label>Suggested caption<textarea value={clip.suggestedCaption ?? ''} onChange={(e) => updateClip(clip.id, { suggestedCaption: e.target.value })} /></label>
-            <button className="danger" onClick={() => removeClip(clip.id)}>Remove clip</button>
+            <button className="btn-danger" onClick={() => removeClip(clip.id)}>Remove clip</button>
           </div>
         ))}
       </div>
-      <button className="primary" onClick={() => upsertGuest(draft)}>Save portal details</button>
+      <button className="btn-primary" onClick={() => upsertGuest(draft)}>Save portal details</button>
     </section>
   );
 }
@@ -302,27 +327,33 @@ export default function GuestPortalPage({ guests, selectedGuest, setSelectedGues
 
   if (!guest) {
     return (
-      <div className="empty-state">
-        <strong>No guest selected</strong>
-        <p>Add a guest from the pipeline page before building a portal.</p>
+      <div className="page-stack">
+        <div className="empty-state">
+          <strong>No guest selected</strong>
+          <p>Add a guest from the pipeline page before building a portal.</p>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="page-stack">
-      <header className="page-header">
-        <div>
-          <p className="eyebrow">Guest-facing</p>
-          <h2>Guest Portal</h2>
-          <p className="muted">One link with the interview SOP, location, asset requests, launch links, clips, and captions.</p>
+      <div className="page-hero portal-page-head">
+        <div className="page-hero__text">
+          <p className="eyebrow eyebrow--accent">Guest-facing · Boarding pass</p>
+          <h1>Guest Portal</h1>
+          <p>One link with the interview SOP, asset requests, launch links, clips, and captions.</p>
         </div>
-        <div className="button-row align-end">
-          <label className="select-guest">Preview guest<select value={guest.id} onChange={(event) => setSelectedGuestId(event.target.value)}>{guests.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
-          <CopyLinkButton value={guestPortalUrl(guest)} />
-          <button onClick={() => setMode(mode === 'preview' ? 'edit' : 'preview')}>{mode === 'preview' ? 'Edit portal' : 'Preview portal'}</button>
+        <div className="portal-page-head__controls">
+          <label className="select-guest">Preview guest
+            <select value={guest.id} onChange={(event) => setSelectedGuestId(event.target.value)}>
+              {guests.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
+            </select>
+          </label>
+          <CopyLinkButton value={guestPortalUrl(guest)} label="Copy link" />
+          <button className="btn-ghost" onClick={() => setMode(mode === 'preview' ? 'edit' : 'preview')}>{mode === 'preview' ? 'Edit portal' : 'Preview portal'}</button>
         </div>
-      </header>
+      </div>
 
       {mode === 'preview' ? <PortalPreview guest={guest} /> : <PortalEditor guest={guest} upsertGuest={upsertGuest} />}
     </div>

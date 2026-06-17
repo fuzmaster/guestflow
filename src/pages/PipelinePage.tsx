@@ -1,8 +1,12 @@
 import { useMemo, useState } from 'react';
 import type { Guest, GuestStage } from '../types';
 import { STAGES, getStageLabel } from '../lib/guestLogic';
-import GuestCard from '../components/GuestCard';
+import { getReadinessScore } from '../lib/readiness';
+import { formatDate } from '../lib/dates';
 import GuestForm from '../components/GuestForm';
+import ReadinessRing from '../components/ReadinessRing';
+import PageHero from '../components/PageHero';
+import SheetDivider from '../components/SheetDivider';
 
 type Props = {
   guests: Guest[];
@@ -11,6 +15,13 @@ type Props = {
   upsertGuest: (guest: Guest) => void;
   deleteGuest: (id: string) => void;
 };
+
+function stageHint(guest: Guest): string {
+  if (guest.recordingDate) return `Records ${formatDate(guest.recordingDate)}`;
+  if (guest.launchDate) return `Launches ${formatDate(guest.launchDate)}`;
+  if (guest.nextFollowUpAt) return `Follow up ${formatDate(guest.nextFollowUpAt)}`;
+  return guest.company || guest.showName;
+}
 
 export default function PipelinePage({ guests, setSelectedGuestId, upsertGuest }: Props) {
   const [showAdd, setShowAdd] = useState(false);
@@ -23,32 +34,65 @@ export default function PipelinePage({ guests, setSelectedGuestId, upsertGuest }
 
   return (
     <div className="page-stack">
-      <header className="page-header">
-        <div>
-          <p className="eyebrow">Pipeline</p>
-          <h2>Guest Pipeline</h2>
-        </div>
-        <button className="primary" onClick={() => setShowAdd((value) => !value)}>{showAdd ? 'Close form' : 'Add guest'}</button>
-      </header>
-      {showAdd && <GuestForm onSave={(guest) => { upsertGuest(guest); setShowAdd(false); }} onCancel={() => setShowAdd(false)} />}
-      <div className="kanban">
+      <PageHero
+        eyebrow="Pipeline · 12 stages"
+        title="Guest Pipeline"
+        sub="Every guest from first yes to final share. Scroll across the stages."
+        right={
+          <button className="btn-primary btn-sm" onClick={() => setShowAdd((v) => !v)}>
+            {showAdd ? 'Close form' : 'Add guest'}
+          </button>
+        }
+      />
+
+      <div style={{ padding: '0 clamp(28px,4vw,56px)' }}>
+        <SheetDivider left="Target" right="Done" />
+      </div>
+
+      {showAdd && (
+        <section className="page-section">
+          <GuestForm onSave={(guest) => { upsertGuest(guest); setShowAdd(false); }} onCancel={() => setShowAdd(false)} />
+        </section>
+      )}
+
+      <div className="kanban gf-scroll">
         {STAGES.map((stage) => (
           <section className="kanban-column" key={stage}>
-            <div className="column-header">
+            <div className="kanban-column__head">
               <strong>{getStageLabel(stage)}</strong>
-              <span>{grouped[stage].length}</span>
+              <span>{grouped[stage].length.toString().padStart(2, '0')}</span>
             </div>
             {grouped[stage].length === 0 ? (
-              <p className="kanban-empty">No one here yet.</p>
+              <div className="kanban-empty">
+                <svg width="22" height="22" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" /></svg>
+                <span>No one here yet</span>
+              </div>
             ) : (
-              grouped[stage].map((guest) => (
-                <div key={guest.id} className="pipeline-card-wrap">
-                  <GuestCard guest={guest} onClick={() => setSelectedGuestId(guest.id)} />
-                  <select value={guest.stage} onChange={(event) => upsertGuest({ ...guest, stage: event.target.value as GuestStage })}>
-                    {STAGES.map((nextStage) => <option key={nextStage} value={nextStage}>{getStageLabel(nextStage)}</option>)}
-                  </select>
-                </div>
-              ))
+              grouped[stage].map((guest) => {
+                const score = getReadinessScore(guest);
+                return (
+                  <div key={guest.id}>
+                    <button className="kanban-card" onClick={() => setSelectedGuestId(guest.id)}>
+                      <div className="kanban-card__head">
+                        <ReadinessRing score={score} size={40} />
+                        <div style={{ minWidth: 0, flex: 1 }}>
+                          <div className="kanban-card__name">{guest.name}</div>
+                          <div className="kanban-card__show">{guest.showName}</div>
+                        </div>
+                      </div>
+                      <div className="kanban-card__hint">{stageHint(guest)}</div>
+                    </button>
+                    <select
+                      className="kanban-stage-select"
+                      style={{ width: '100%', marginTop: 6 }}
+                      value={guest.stage}
+                      onChange={(event) => upsertGuest({ ...guest, stage: event.target.value as GuestStage })}
+                    >
+                      {STAGES.map((nextStage) => <option key={nextStage} value={nextStage}>{getStageLabel(nextStage)}</option>)}
+                    </select>
+                  </div>
+                );
+              })
             )}
           </section>
         ))}

@@ -2,17 +2,14 @@ import { useState } from 'react';
 import type { Guest } from '../types';
 import { guestsToCsv, downloadFile } from '../lib/csv';
 import { resetGuests } from '../lib/storage';
-import {
-  loadShowDefaults,
-  saveShowDefaults,
-  type ShowDefaults,
-} from '../lib/showDefaults';
+import { loadShowDefaults, saveShowDefaults, type ShowDefaults } from '../lib/showDefaults';
+import PageHero from '../components/PageHero';
+import SheetDivider from '../components/SheetDivider';
 
 type DefaultField = {
   key: keyof ShowDefaults;
   label: string;
   type?: 'input' | 'textarea';
-  hint?: string;
 };
 
 const FIELDS: DefaultField[] = [
@@ -65,49 +62,59 @@ export default function SettingsPage({ guests, setGuests }: { guests: Guest[]; s
 
   return (
     <div className="page-stack">
-      <header className="page-header">
-        <div>
-          <p className="eyebrow">Settings</p>
-          <h2>Settings / Export</h2>
-        </div>
-        <p className="muted">Defaults flow into every new guest. Your data stays in this browser.</p>
-      </header>
+      <PageHero
+        eyebrow="Settings · Local store"
+        title="Settings & Export"
+        sub="Defaults flow into every new guest. Your data stays in this browser."
+      />
 
-      <section className="settings-card">
-        <div className="card-topline">
-          <div>
-            <h3>Show defaults</h3>
-            <p className="muted">Set once. Every new guest inherits these for show, host, location, prep, and platform links. Existing guests are untouched.</p>
+      <div style={{ padding: '0 clamp(28px,4vw,56px)' }}>
+        <SheetDivider left="Defaults" right="Data utilities" />
+      </div>
+
+      <section className="page-section page-section--gap-md">
+        <section className="settings-card">
+          <div className="card-topline">
+            <div>
+              <p className="eyebrow">Show defaults</p>
+              <h3 style={{ marginTop: 6 }}>Set once. Inherit everywhere.</h3>
+              <p className="muted" style={{ margin: '8px 0 0' }}>
+                New guests inherit host, location, prep, and platform links from here. Existing guests stay untouched.
+              </p>
+            </div>
+            <div className="button-row">
+              <button className="btn-primary btn-sm" onClick={persistDefaults}>{savedAt ? 'Saved' : 'Save defaults'}</button>
+            </div>
           </div>
-          <div className="button-row">
-            <button className="primary" onClick={persistDefaults}>{savedAt ? 'Saved' : 'Save defaults'}</button>
+          <div className="form-grid">
+            {FIELDS.filter((field) => field.type !== 'textarea').map((field) => (
+              <label key={field.key}>
+                {field.label}
+                <input value={defaults[field.key] ?? ''} onChange={(event) => update(field.key, event.target.value)} />
+              </label>
+            ))}
           </div>
-        </div>
-        <div className="form-grid">
-          {FIELDS.filter((field) => field.type !== 'textarea').map((field) => (
+          {FIELDS.filter((field) => field.type === 'textarea').map((field) => (
             <label key={field.key}>
               {field.label}
-              <input value={defaults[field.key] ?? ''} onChange={(event) => update(field.key, event.target.value)} />
+              <textarea value={defaults[field.key] ?? ''} onChange={(event) => update(field.key, event.target.value)} />
             </label>
           ))}
-        </div>
-        {FIELDS.filter((field) => field.type === 'textarea').map((field) => (
-          <label key={field.key}>
-            {field.label}
-            <textarea value={defaults[field.key] ?? ''} onChange={(event) => update(field.key, event.target.value)} />
-          </label>
-        ))}
-      </section>
+        </section>
 
-      <section className="settings-card">
-        <h3>Data utilities</h3>
-        <p className="muted">Everything is stored in this browser with localStorage. Nothing is sent anywhere.</p>
-        <div className="button-row">
-          <button onClick={exportJson}>Export guests as JSON</button>
-          <button onClick={exportCsv}>Export guests as CSV</button>
-          <label className="file-button">Import guests from JSON<input type="file" accept="application/json" onChange={(event) => importJson(event.target.files?.[0] ?? null)} /></label>
-          <button className="danger" onClick={() => setGuests(resetGuests())}>Reset mock data</button>
-        </div>
+        <section className="settings-card">
+          <p className="eyebrow">Data utilities</p>
+          <h3 style={{ marginTop: 6 }}>Your data, in this browser.</h3>
+          <p className="muted" style={{ margin: '0 0 8px' }}>
+            Nothing is sent anywhere. Export anytime as JSON or CSV.
+          </p>
+          <div className="button-row">
+            <button className="btn-ghost btn-sm" onClick={exportJson}>Export guests as JSON</button>
+            <button className="btn-ghost btn-sm" onClick={exportCsv}>Export guests as CSV</button>
+            <label className="file-button">Import guests from JSON<input type="file" accept="application/json" onChange={(event) => importJson(event.target.files?.[0] ?? null)} /></label>
+            <button className="btn-danger" onClick={() => setGuests(resetGuests())}>Reset mock data</button>
+          </div>
+        </section>
       </section>
     </div>
   );

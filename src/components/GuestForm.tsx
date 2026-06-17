@@ -130,8 +130,8 @@ export default function GuestForm({ guest, onSave, onCancel }: Props) {
 
       <label>Notes<textarea value={draft.notes} onChange={(e) => update('notes', e.target.value)} /></label>
       <div className="button-row">
-        <button className="primary" onClick={save}>Save guest</button>
-        {onCancel && <button onClick={onCancel}>Cancel</button>}
+        <button className="btn-primary" onClick={save}>Save guest</button>
+        {onCancel && <button className="btn-ghost" onClick={onCancel}>Cancel</button>}
       </div>
     </div>
   );
