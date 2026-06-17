@@ -117,7 +117,10 @@ export default function GuestPortalPage({ guests, selectedGuest, setSelectedGues
               {guests.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
             </select>
           </label>
-          <CopyLinkButton value={guestPortalUrl(guest)} label="Copy share link" />
+          <div className="share-control">
+            <CopyLinkButton value={guestPortalUrl(guest)} label="Copy share link" />
+            <p className="share-warning">Anyone with this link sees the portal. Don't post it publicly.</p>
+          </div>
           <button className="btn-ghost" onClick={() => setMode(mode === 'preview' ? 'edit' : 'preview')}>{mode === 'preview' ? 'Edit portal' : 'Preview portal'}</button>
         </div>
       </div>

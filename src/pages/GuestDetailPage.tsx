@@ -61,6 +61,7 @@ export default function GuestDetailPage({ guest, upsertGuest, deleteGuest, openP
         <CopyLinkButton value={guestPortalUrl(guest)} label="Copy link" />
         <button className="btn-danger" onClick={() => deleteGuest(guest.id)}>Delete</button>
       </div>
+      <p className="share-warning">Anyone with this link sees the portal. Don't post it publicly.</p>
 
       {editing ? (
         <GuestForm guest={guest} onSave={(nextGuest) => { upsertGuest(nextGuest); setEditing(false); }} onCancel={() => setEditing(false)} />

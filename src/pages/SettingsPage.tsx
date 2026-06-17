@@ -116,6 +116,19 @@ export default function SettingsPage({ guests, setGuests }: { guests: Guest[]; s
           </div>
         </section>
 
+        <section className="settings-card">
+          <p className="eyebrow">Data &amp; privacy</p>
+          <h3 style={{ marginTop: 6 }}>Local-first, on purpose.</h3>
+          <p className="muted" style={{ margin: '0 0 8px' }}>
+            Everything you type stays in this browser. No analytics, no telemetry, no third-party
+            tracking. Share links are unguessable but anyone with one can open the portal — treat
+            them like a private Drive link, not a tweet.
+          </p>
+          <div className="button-row">
+            <a className="btn-ghost btn-sm" href="https://github.com/fuzmaster/guestflow/blob/main/PRIVACY.md" target="_blank" rel="noreferrer">Read full data &amp; privacy notes</a>
+          </div>
+        </section>
+
         <section className="settings-card settings-card--accent">
           <p className="eyebrow eyebrow--accent">Coming soon</p>
           <h3 style={{ marginTop: 6 }}>Accounts &amp; multi-show sync</h3>
