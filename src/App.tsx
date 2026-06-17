@@ -12,9 +12,14 @@ import SettingsPage from './pages/SettingsPage';
 import GuestPortalPage from './pages/GuestPortalPage';
 import NextActionsPage from './pages/NextActionsPage';
 import WelcomePage from './pages/WelcomePage';
+import PublicGuestPortal from './pages/PublicGuestPortal';
 import Footer from './components/Footer';
 
 const WELCOMED_KEY = 'guestflow.welcomed.v1';
+
+function isPublicPortalPath(): boolean {
+  return typeof window !== 'undefined' && window.location.pathname.startsWith('/g/');
+}
 
 function initialPage(): Page {
   const params = new URLSearchParams(window.location.search);
@@ -24,9 +29,14 @@ function initialPage(): Page {
 }
 
 export default function App() {
+  const [isPublic] = useState<boolean>(() => isPublicPortalPath());
   const [guests, setGuests] = useState<Guest[]>(() => loadGuests());
   const [page, setPage] = useState<Page>(() => initialPage());
   const [selectedGuestId, setSelectedGuestId] = useState<string | null>(null);
+
+  if (isPublic) {
+    return <PublicGuestPortal onOpenApp={() => { window.location.href = '/'; }} />;
+  }
 
   useEffect(() => {
     saveGuests(guests);

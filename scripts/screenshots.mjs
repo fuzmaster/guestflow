@@ -20,6 +20,42 @@ const SHOTS = [
     fullPage: true,
   },
   {
+    name: 'public-portal',
+    viewport: { width: 1280, height: 2000, deviceScaleFactor: 2 },
+    setup: async (page) => {
+      await page.evaluate(() => {
+        localStorage.setItem('guestflow.welcomed.v1', '1');
+      });
+      await page.goto(BASE, { waitUntil: 'networkidle2' });
+      // navigate via the portal so we can grab the copy URL
+      await page.evaluate(() => {
+        const buttons = [...document.querySelectorAll('.nav-list button')];
+        buttons.find((b) => b.textContent.trim() === 'Guest Portal')?.click();
+      });
+      await new Promise((r) => setTimeout(r, 400));
+      // pick Andre Brooks for fewer missing items
+      await page.evaluate(() => {
+        const select = document.querySelector('.select-guest select');
+        if (!select) return;
+        const target = [...select.options].find((o) => o.textContent.includes('Andre'));
+        if (target) {
+          select.value = target.value;
+          select.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      });
+      await new Promise((r) => setTimeout(r, 300));
+      // grab the URL and navigate to it
+      const shareUrl = await page.evaluate(() => {
+        return document.querySelector('.copy-link__hint')?.textContent ?? null;
+      });
+      if (shareUrl) {
+        await page.goto(shareUrl, { waitUntil: 'networkidle2' });
+        await new Promise((r) => setTimeout(r, 400));
+      }
+    },
+    fullPage: true,
+  },
+  {
     name: 'next-actions',
     viewport: { width: 1440, height: 1000, deviceScaleFactor: 2 },
     setup: async (page) => {

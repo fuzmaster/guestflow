@@ -1,8 +1,13 @@
 import type { Guest } from '../types';
+import { encodePortalShare } from './portalShare';
 
-const PORTAL_HOST = 'https://guestflow.app';
+function origin(): string {
+  if (typeof window === 'undefined') return 'https://guestflow.app';
+  return window.location.origin;
+}
 
 export function guestPortalUrl(guest: Guest): string {
   const slug = guest.guestPortalSlug || guest.id;
-  return `${PORTAL_HOST}/g/${slug}`;
+  const data = encodePortalShare(guest);
+  return `${origin()}/g/${slug}#d=${data}`;
 }

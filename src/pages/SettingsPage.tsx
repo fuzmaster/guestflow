@@ -115,6 +115,21 @@ export default function SettingsPage({ guests, setGuests }: { guests: Guest[]; s
             <button className="btn-danger" onClick={() => setGuests(resetGuests())}>Reset mock data</button>
           </div>
         </section>
+
+        <section className="settings-card settings-card--accent">
+          <p className="eyebrow eyebrow--accent">Coming soon</p>
+          <h3 style={{ marginTop: 6 }}>Accounts &amp; multi-show sync</h3>
+          <p className="muted" style={{ margin: '0 0 12px' }}>
+            GuestFlow is local-first today — your guests live in this browser. An optional account
+            tier will let you run multiple shows, sync across devices, and let guests update their
+            own info inside the portal. JSON export will stay free and always work.
+          </p>
+          <div className="button-row">
+            <button className="btn-ghost btn-sm" disabled style={{ opacity: 0.6, cursor: 'not-allowed' }}>
+              Get notified when accounts launch
+            </button>
+          </div>
+        </section>
       </section>
     </div>
   );
